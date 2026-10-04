@@ -1,0 +1,358 @@
+# EAS Tools Changelog
+
+2026-09-29:
+
+- Update AGENTS.md and README.md to better serve autonomous coding agents like Claude Code when working with this repository. Thank you to GitHub user @seasonal-currency for suggesting this change.
+
+---
+
+2026-09-27:
+
+- Redid WarnGen even more to fix a number of issues regarding the behavior and to add more product types. The templates now include additional product types that were previously missing, such as civil alerts (think Child Abduction Emergencies, Civil Emergency Messages, etc.). Most types of watches have also been added to the templates, including tornado, severe thunderstorm, and winter/tropical weather type watches.
+
+- Add satellite imagery to WarnGen. This allows users to include satellite imagery when generating alerts, providing a more comprehensive and informative experience. The imagery goes up to zoom level 13, and has been tested to work on both web and mobile platforms. The satellite imagery is sourced from a reliable provider (specifically `nationalmap.gov`), and will be updated regularly to ensure that users have access to the most current and accurate images. **Due to the size of the PMTiles file (over 15 GB!), this feature REQUIRES an active Internet connection to use fully.** However, if you wish to obtain a local copy, the full file [is available for download at this link](https://eas.tools/warngen/data/satellite.pmtiles), and you may feel free to download it for your local use. However, please note this file is LARGE, and will take a while to download. It is not included in the GitHub repository, and your local copies must be managed manually/updated as needed as satellite imagery is updated. Updates wil be posted to this changelog when they are made to the images, so you may update your copies at that time. Thank you to both GitHub user @GreatLordBug and Discord user pringlezgameing for suggesting this feature.
+
+- Add support for AR2V radar images. These kinds of files come from UniData NEXRAD, and are available in a public S3 bucket located at `https://unidata-nexrad-level2.s3.amazonaws.com/?list-type=2&prefix=...`. You can use custom (mock) radar imagery or pre-existing radar imagery from the NEXRAD archive. This allows you to upload previous (or fake) storms to generate realistic-looking alerts based on the radar data you have available. The AR2V radar images are processed and displayed fully locally in the browser. Thank you to Discord user nwshouston for suggesting this feature.
+
+- Update almost all documentation pages to reflect the current state of the Tools and their features. This includes updates to the FAQ, TTS documents, and adds a new TTS List page for the current list of available TTS voices and, importantly, **where to download your own, locally hosted, copies** of every single voice on EAS Tools. This helps reduce load on the Web TTS service, and allows for more freedom in how you use the voices. The TTS List page is located [here](https://eas.tools/tts-list.html), and includes links for most voice banks. Some are not hosted due to reasons beyond my control, but as the TTS service is updated, I will continue to add more voices to the list as they become available. There is also a "Wanted Voices" list for voices that are not currently available but are desired by users. If you have any questions or suggestions for improving the TTS List page, please let me know so I can consider them for future updates. Thank you!
+
+- Update CLAUDE.md to be a symlink to AGENTS.md. Thanks to GitHub user @seasonal-currency for suggesting this.
+
+- Add some more SAME event codes from ComLabs EMNet. Thanks to GitHub user @jakescooty for raising this issue.
+
+- Add the ability to override the SAME code sender to be longer than 8 characters in the Text Crawl Generator. Thanks (again) to GitHub user @jakescooty for suggesting this.
+
+- Fix a bug where AWIPS headers were not being validated fully in the encoder. This meant some headers were rejected for an ambiguous reason, and this has been fixed to provide more a more accurate reasoning (most commonly, this was due to the 31 FIPS code limit being exceeded). Thanks to GitHub user @InternOfCEOs for reporting this issue.
+
+---
+
+2026-09-18:
+
+- Add the ability to use custom sounds for the "beep/sound on alert received" feature in the decoder tool. This allows users to select their own audio files to play when an alert is received, providing a more personalized experience. Most audio file types are supported. Files are saved on-device so they will persist across sessions, and the decoder will use the last selected file as the default for future alerts.
+
+- WarnGen is now accessible to visually impaired users who use screen readers. The WarnGen tool has been updated to include full keyboard controls and screen reader support, allowing users to navigate and interact with the tool using only their keyboard and screen reader software. This change improves accessibility for users with visual impairments, ensuring that they can use the WarnGen tool effectively and independently. The documentation has been updated to reflect this, as well as the keyboard controls for the tool. If you have any feedback or suggestions for improving the accessibility of the WarnGen tool, please let me know so I can consider them for future updates. Future updates are already planned in addition to the changes being pushed today. Thanks to [Max Baykowski](https://www.youtube.com/@maxbaykowski) for suggesting this change and providing direct, pre-release/beta feedback on the accessibility improvements.
+
+- Overhaul the decoder logic from the ground up. The decoder's core has been completely rewritten to improve performance, reliability, and accuracy when decoding alerts, using a copy of the decoding logic used by [SeaTTY](https://www.dxsoft.com/en/products/seatty/). This now means that alerts decode more frequently and correctly than ever before, and the logic used is much more sensitive to the AFSK data used in the SAME protocol. If you wish to see how the logic was implemented, you can view the source code for the WebAssembly module used in the decoder tool [here](https://github.com/wagwan-piffting-blud/seatty-same-wasm). Please let me know if you notice any issues with the new decoder logic, as I am always looking to improve it even further.
+
+- Add Atari 800XL screen to the Text Crawl Generator. This screen is now available as an option in the "Premade Backgrounds" dropdown menu, allowing users to select it for their text crawl projects. The Atari 800XL screen is a classic design that was used in many (mock) EAS alertsk and while never used (to my knowledge) in real EAS broadcasts, it is a fun and nostalgic option for users who want to create text crawls that resemble those seen on more retro YouTube channels like [The EAS Experience](https://www.youtube.com/@theEASexperience). Thanks to @jakescooty who suggested this new screen.
+
+- Add some new macros that Claude came up with at my request, on a whim. These macros are based on what it thinks the broadcast chain for the following stations sounds like:
+
+  - KGG68 (Texas)
+  - KHB33 (Texas)
+  - KJY96 (Oklahoma)
+  - KWO39 (Illinois)
+  - KXI76 (Georgia)
+  - WWG81 (Kentucky)
+  - WXJ45 (Colorado)
+  - WXL37 (New York)
+
+Let me know if these macros are any good, as I have not tested them personally. They may be good sounding macros, they may not be.
+
+---
+
+2026-09-08:
+
+- This is another VERY big update to EAS Tools, mainly because I combined a lot of smaller updates into one large update so it's easier for me to manage and track. The main focus of this update is on the Text Crawl Generator tool, which has been rebuilt from the ground up. The primary change is that the video/GIF result no longer depends on how fast your computer or phone happens to be. Exports used to be recorded, in real time, off the live preview, which meant the frame rate was whatever your display and machine averaged at the moment, and any hiccup while recording became a dropped or duplicated frame in the file. Both exports are now rendered frame by frame at a fixed frame rate you pick, and every frame is handed to the encoder with an exact timestamp, so a phone produces the same file as a desktop; it just takes longer to get there. The progress bar now also shows an estimated time remaining on web. As well, the crawl preview updates are now **live**, meaning changing a setting takes effect immediately. The "Start Crawl", "Destroy Crawl Instance" buttons have been removed as a direct result of this. The preview WINDOW remains for ease of use. **IMPORTANT NOTE FOR MOBILE APP USERS**: The mobile apps will receive the update automatically and _should_ work just fine, but note they will NOT have certain features still, like live preview updates and the time remaining on exports. These will be added, but need a full store update and approval to get them out, so for now, the mobile apps will just have the new frame-by-frame rendering and the other backend improvements.
+
+- Fixed the Text Crawl Generator's Crawl Width and Crawl Height fields rewriting themselves while you type (this closes issue #99). The crawl canvas needs even dimensions because the GIF and WebM encoders require them, but that rounding was being applied on every keystroke and written straight back into the box: typing a 1 turned it into a 2 before you could type the next digit, and typing 1920 one character at a time came out as 3020. The rounding now happens when you leave the field instead, so you can type any number you like and it settles on the nearest even value once you are done. This only showed up after a crawl had been started, which is why it was easy to miss.
+
+- Add a Speech Volume control alongside Speech Speed and Speech Pitch in both the Encoder and the Audio Splicer. It works exactly like the other two: a slider paired with a number box, -10 to +10, 0 meaning no change, and a Reset button. All three combine freely in any mix, so speed plus volume, or all three at once, nest correctly into whatever markup the selected backend speaks. VoiceText voices get `<vtml_volume value="1-500">`, and are the only backend that can go louder than normal; +10 is five times normal volume. Balabolka, Balcon and Speechify voices get `<volume level="1-100">`, and because SAPI treats 100 as full volume, they can only be made quieter. A positive volume setting on those voices is simply ignored rather than being turned into a tag that does nothing, and the control says so on screen. The volume control is hidden entirely for backends that cannot act on it, including the local eSpeak voices.
+
+- Consolidated the two copies of the Web TTS request code. The Encoder and the Audio Splicer each had their own near-identical version of the same 150 lines: the same request, the same payload decoding, the same response handling, the same fallback for when the service answers with HTML instead of audio. They now share one implementation, with each tool keeping only the part that is genuinely its own. This also fixed a small bug where the Encoder could restore stale announcement text left over from a previous generation.
+
+- Add eSpeak-NG WASM voices to the encoder and splicer. These voices are now available for use in the encoder and splicer tools, providing users with a wider range of TTS options for generating alerts. Though these voices were never _truly_ used in EAS activations, they are still a popular choice for mock makers due to their ease of use and availability. This closes issue #100.
+
+- WarnGen now has a light mode. This allows users to switch between light and dark mode for the WarnGen tool based on their system preferences, providing a more comfortable viewing experience based on their system settings. The light mode is designed to be easy on the eyes and provides a clean, modern look for the WarnGen tool. If you have any feedback or suggestions for improving the light mode, please let me know so I can consider them for future updates.
+
+- Documentation updates across for the TTS portion of the documentation. This page was pretty badly out of date, so I updated it to reflect the current state of the TTS service and the available voices. The documentation now includes information on the new eSpeak-NG WASM voices, as well as updates to the existing voices and their capabilities. If you notice any discrepancies or have any suggestions for improving the TTS documentation, let me know so I can address them ASAP.
+
+- Add number controls to the rate/pitch voice controls for the TTS voices in the encoder/splicer tools. This allows users to adjust the rate and pitch of the TTS voices using a numeric input in addition to the slider, providing more precise control over the voice parameters. The numeric input allows users to enter specific values for rate and pitch, which can be useful for achieving a desired effect or matching a specific voice style (especially helpful for mobile users, where sliders can be a bit finicky).
+
+- Update EASyPLUS pre-made background in the text crawl tool to disable the controls for sizing, which are specified by JavaScript and not are not user-customizable. This change ensures that the EASyPLUS background is displayed correctly and consistently, and locks out the controls so users do not mistakenly think they are changing something they cannot. If there is anything in the update I missed, I am sorry, but I believe this should cover the main changes and improvements made in this update. If you have any questions or feedback about these changes, please let me know so I can address them in even more future updates.
+
+- VERY MINOR extra update to prepare for mobile app version 3.5.0.
+
+---
+
+2026-08-31:
+
+- Add more customizability to the Encoder, specifically relating to delay timings between various aspects of the alert audio. Specifically, this change allows users to independently, or collectively, adjust the delays between:
+
+  - Between the beginning of the audio and the start of the SAME tones
+  - Between the header tones and the attention signal
+  - Between the attention signal and the voice message (if any)
+  - Between the voice message (if any) and the EOM tones
+  - Between the EOM tones and the end of the audio
+
+The delay can be anywhere from 0 to 30 seconds (specified in milliseconds), and can be adjusted in increments of 50 milliseconds. This change provides users with more control over the timing of their generated alerts, allowing them to create alerts that sound more natural and realistic. If you have any feedback or suggestions for further improvements to the Encoder's delay settings, please let me know so I can consider them for future updates.
+
+- Add auto-record toggle as well as a "notify on alert received" toggle to the Decoder tool. The auto-record toggle allows users to determine whether to automatically start recording when an alert is received, while the "notify on alert received" toggle allows users to receive the sounds of a BC370CRS weather radio when an alert is received. This change provides users with more control over how they receive and respond to alerts, allowing them to customize their experience based on their preferences and needs. Credits to user [jacklefucksnetwork](https://www.youtube.com/channel/UCxdYMkg8HS1CrFy7k3GtwTg) in the GWES Discord for the very clean sounding BC370CRS weather radio sound effects! The decoder has been slightly restructured looks-wise to accommodate these new toggles, and localStorage settings have been added to remember the user's preferences for these toggles across sessions.
+
+- Update spfy WASM voices to version 2026.08.31.
+
+---
+
+2026-08-25:
+
+- Fixed a large number of WarnGen bugs and anachronisms in the templates raised by users of the tool. Thank you to everyone who reported these issues and provided feedback on the WarnGen templates. Your feedback matters and helps improve the accuracy and reliability of the WarnGen tool for all users. If you notice any further issues or discrepancies in the WarnGen templates, please let me know so I can address them in future updates.
+
+- Add text width adjustment in the Text Crawl Generator. This allows users to adjust the width of the text in their crawls, which can be useful for fitting longer messages into a smaller space or for creating a specific visual effect. This is separate from kerning, which is still available as a separate option. The text width adjustment can be found with the other crawl options in the Text Crawl Generator, and it allows users to choose from a range of 0-200%, with 100% being "baseline/no change". This change provides users with more control over the appearance of their text crawls and allows for greater flexibility in designing their messages.
+
+- Allow AWIPS/VTEC product header strings to be converted to ZCZC strings. This closes issue #55. This allows users to convert AWIPS/VTEC product header strings (which are used in NWS products) into ZCZC strings (which are used in SAME messages). This can be useful for users who want to generate SAME messages based on AWIPS/VTEC product headers, or for users who want to convert existing AWIPS/VTEC product headers into ZCZC strings for use in their own projects.
+
+---
+
+2026-08-23:
+
+- Sorry for the recent lack of updates everyone, I've been busy with the Speechify project, trying to get CRS Mara and CRS Tom out the door. But now that both voices are available, I can get back to EAS Tools and start pushing out some updates again. This update is a big one to make up for said lack of updates, and it includes a number of new features and improvements as always. So, let's get into it!
+
+- Add CRS Mara and CRS Tom to the list of Speechify WASM voices and to the Web TTS service. These voices are now available for use in the encoder and splicer tools, and they provide a more authentic experience for users who want to generate alerts that sound like they were produced by a real CRS unit. The addition of these voices expands the range of TTS options available to users, allowing for more flexibility and creativity in generating alerts. If you notice any issues with the new voices or have any feedback, please let me know so I can address them in future updates. The Mara voice... isn't the greatest quality, but it is the best I could do with the available resources. The Tom voice is much better quality, and should provide a more natural-sounding experience.
+
+- Macro chains! Yes, really. Need I say more? (I will anyways.) Macro chains allow users to apply multiple macros in sequence to a single audio file, creating complex audio effects that would be difficult or impossible to achieve with a single macro. This feature opens up a whole new world of possibilities for audio editing and manipulation, allowing users to create unique and interesting audio effects for their alerts. To use macro chains, simply select the "Macro Chain Editor" option in the audio splicer tool, and then add the desired macros in the order you want them to be applied. The tool will then process the audio file through each macro in sequence, producing a final output that reflects the combined effects of all the selected macros or effects. Audacity built-ins are also supported as options, if you need to apply a certain single effect that isn't a macro in itself. If you have any questions or feedback about macro chains, please let me know so I can improve this feature in future updates. IMPORTANT NOTE: Macro chains are limited to either 10 macros total or 250 "steps" (with each step being a single effect in a macro), whichever comes first. This is to prevent excessive processing times and potential performance issues when applying multiple macros to a single audio file. If you need to apply more than 10 macros or 250 steps, save the audio out and then re-import it to apply more macros in a new chain. These limits should be sufficient for most use cases, but if you have any feedback or suggestions for improving this feature, please let me know.
+
+- Add custom macro support. This allows users to create their own macros using the Audacity macro format, and then use them in the audio splicer tool just like any other macro. Custom macros can be created by writing a simple text file that defines the desired audio processing steps, and then saving it with a .txt extension. Once the custom macro is created, it can be loaded into the audio splicer tool and applied to audio files just like any other macro. This feature provides users with even more flexibility and control over their audio processing, allowing them to create unique and personalized effects for their alerts. This is also helpful if you have a macro that is not already in EAS Tools, but you want to use it in the splicer tool.
+
+- WarnGen updates. The WarnGen tool has been updated to include a number of new, additional product types and follow-up alert types. If you notice a WarnGen template that is either outdated or incorrect, please let me know so I can update it. The templates are based on the most recent versions available in AWIPS CAVE (version 23.4.3), but there may be some discrepancies due to changes in AWIPS CAVE over time, or differences between the template versions used by each individual office. Please let me know if you notice any anachronisms in the templates, and I will update them as soon as possible.
+
+- Some minor Audacity VST/plugin updates have been made to the audio splicer tool, such as changing which VSTs or plugins are loaded/used in the splicer tool, and some minor bug fixes and improvements to the code. MdaOverdrive is now the correct version and runs a bit more "hot" than the previous version, which should provide a more authentic experience for users who want to use this effect in their audio processing. As well, some "dead weight" effects were dropped/archived. On a related note, Allpassphase now runs much faster thanks to a newer version of the plugin being used in the splicer tool. Please let me know if anything does not sound as expected after this update and I will look into it. Thank you for tuning in to this update, and I hope you enjoy all the new features and improvements I've made!
+
+---
+
+2026-08-08:
+
+- Add "XJ - Car radio dynamics" macro. Credits to xyzlojones for creating this macro. This macro simulates the sound of a car radio from the inside of a car, including the dynamics and frequency response of a typical car audio system. It can be used to create more realistic audio effects for alerts that are intended to be heard in a vehicle environment. Additional credits to The Guy EAS Mocks for suggesting this macro be added.
+
+---
+
+2026-07-31:
+
+- Minor crawl bundle changes to support app version 3.4.0. The app and web now bridge static backgrounds to the crawl generator, so that the crawl generator in-app can use the same backgrounds as on the web without a major app update needed to add new crawl backgrounds. This change should improve the user experience by allowing users to access new crawl backgrounds without needing to update the app, and it also simplifies the process of adding new backgrounds to the crawl generator in the future.
+
+- Add "eomDelay" option to the encoder. This option allows users to add a delay (in milliseconds) between the end of the announcement (TTS or custom) and the end of message (EOM) tones in the generated audio. The delay can be set to any value between 0 and 30000 milliseconds (aka 30 seconds), and it can be useful for creating a more natural-sounding pause after the announcement before the EOM tones fire. This change provides users with more control over the timing of their generated audio and allows them to create alerts that sound more like real-world broadcasts.
+
+---
+
+2026-07-28:
+
+- Add Gorman Redlich EAS-1CG premade background to the Text Crawl Generator. This background is now available as an option in the "Premade Backgrounds" dropdown menu, allowing users to select it for their text crawl projects. The Gorman Redlich EAS-1CG background is a classic design that was used in many EAS broadcasts, and its addition to the Text Crawl Generator provides users with more options for creating authentic-looking EAS screens.
+
+- Add [EAS-1CG Neue font](https://fontstruct.com/fontstructions/show/2783365/eas-1cg-neue) to the Text Crawl Generator. This font is a modernized version of the original EAS-1CG font (also by xyzlojones), and it is now available as an option in the "Font" dropdown menu. The EAS-1CG-Neue font provides a clean and legible typeface that is suitable for use in Gorman EAS screens, and its addition to the Text Crawl Generator allows users to create text crawls that closely resemble those seen in real EAS broadcasts. Credits to xyzlojones for creating the EAS-1CG Neue font.
+
+---
+
+2026-07-27:
+
+- Defer macro list load to only when the user tries to select a macro to apply. This should improve load times for the audio splicer tool, especially on slower devices or connections. The macro list is now only fetched from the server when the user clicks on the "Select Macro" button, rather than loading it eagerly on page load.
+
+- Fix splicer tool to not try and load absurdly huge files into memory. This change prevents the splicer tool from attempting to load files that are too large to be handled by the browser/apps, which can cause crashes or performance issues. The splicer tool will now check the file size before attempting to load it, and will display an error message if the file is too large to be processed.
+
+- Minor CSS nit: Fix the width of the macro combo box in the audio splicer tool to be 100% of the viewport width on mobile, rather than a fixed width. This change ensures that the macro combo box is properly sized and aligned with the rest of the splicer tool interface, improving usability and aesthetics.
+
+- Update stylesheet a bit more for mobile.
+
+- Update splicer tool even more to handle large (like, near GB size at **least**) files better on native mobile apps. Now you can edit these files in the app without crashing the app or running out of memory. The splicer tool now uses a more efficient method for processing large audio files (backed by storage), which should improve performance and reduce the likelihood of crashes or memory issues on mobile devices.
+
+- Further bug fixes and improvements to performance for both web and native mobile.
+
+---
+
+2026-07-26:
+
+- Add "emulate ENDEC sample rate" option to the encoder. This option allows users to choose whether they want to emulate the sample rate of the selected ENDEC mode or keep the full-bandwidth audio. When enabled, the encoder will resample the audio to match the sample rate of the selected ENDEC mode, which can help add to authenticity when generating alerts. When disabled, the encoder will keep the full-bandwidth audio, which may be preferred for certain use cases. This change provides users with more control over the audio output of the encoder and allows them to choose the option that best suits their needs.
+
+- Added more ENDEC modes, including (but not limited to) HollyAnne. This change expands the range of ENDEC modes available in the encoder (in addition to the sample rate changes listed above), allowing users to generate alerts that are accurate to this model of ENDEC.
+
+- Remove coi-serviceworker.js. This file was previously used to handle service worker registration and caching for the EAS Tools website, but it is no longer needed due to changes in the way the website is deployed and served. The removal of this file should not affect the functionality of the website or any of its tools, as service worker registration is now handled directly by the origin web server (Hetzner VPS). This change simplifies the codebase and reduces potential confusion for developers working on the project.
+
+---
+
+2026-07-25:
+
+- Update announcements.js to support native mobile app announcements. This change allows the announcements feature to work seamlessly on both web and native mobile platforms, ensuring that users receive important updates and notifications regardless of the device they are using.
+
+- Add times from 0000 to 9900 in the encoder's duration dropdown. This also reaches parity with the native mobile apps, which already had these options available. This change provides users with a wider range of duration options for their alerts, allowing for more flexibility in message timing. This closes issue [#53](https://github.com/wagwan-piffting-blud/EAS-Tools/issues/53).
+
+---
+
+2026-07-24:
+
+- Remove an errant line in the WarnGen templates that were never part of the actual templates in AWIPS CAVE. This line was added at some point by TB01 and should not have been there: "Wait until at least 30 minutes after the storm ends to resume outdoor activities." This line was never used in real broadcasts or in AWIPS CAVE. Thanks to Gigabyte97 and chcoa for reporting this issue.
+
+---
+
+2026-07-23:
+
+- Fix small bug regarding Piper TTS voices not loading in some scenarios and late service-worker registration, which caused the TTS voices to not be available in the encoder and splicer tools. Thank you to user umalover in the GWES Discord for reporting this issue.
+
+- Deleted no-longer-needed `.htaccess` file from the root of the repository. This file was previously used to configure certain server settings, but it is no longer necessary due to changes in the deployment process and server configuration.
+
+---
+
+2026-07-21:
+
+- Fix a bug where the site-wide footer's TTS request counter would re-fetch the current request count once per second on macOS clients, spamming the server logs with a flood of `get_current_request_count` requests. This was caused by the footer's midnight-rollover logic relying on `Intl.DateTimeFormat` with `hour12: false`, which is spec-ambiguous about whether midnight is reported as hour "00" or "24". On macOS, the formatter resolves to the "24" cycle, which corrupted the timezone offset math and computed the next reset time as a moment already in the past. Because the one-second UI tick re-fetches the counter whenever the reset time has passed, this caused it to fire on every tick indefinitely instead of once every five minutes. The date-parsing logic now normalizes an hour of 24 back to 0, so the reset time is now computed correctly on all platforms. Thanks macOS for being the odd man out in this situation.
+
+---
+
+2026-07-20:
+
+- Fix incorrect SAME Event code for "Nuclear Power Plant Warning" (NUW) in the E2T translation layer. This was previously "Nuclear Plant Warning", which is incorrect. The correct event code is "Nuclear Power Plant Warning", and this change ensures that the E2T translation layer accurately reflects the correct event code for NUW. This change should improve the accuracy and reliability of the E2T translation layer, especially for users who rely on it for generating accurate messages. Event code NPM (Nuclear Power Plant Test) was also corrected.
+
+- Fix a bug where duration times in the encoder would roll over to NaN sometimes in both the web and native apps. This was caused by a bug in the way the encoder was handling duration times, which could result in the duration being set to NaN under certain conditions. Also add more time options to the web version of the encoder (closes [#51](https://github.com/wagwan-piffting-blud/EAS-Tools/issues/51)).
+
+- REMOVED the previous note and demos for the "Native Speechify" voices. This is because I found a way to get the synthesis _EVEN FASTER UNDER WINE_ (if you can believe it!) and that works better for the purpose of the EAS TTS service than native Linux binaries. The native binaries were a bit of a pain to get working, and they were not as fast as I wanted them to be. The new method is much faster and more reliable, and it should provide a better experience for users who want to use the Speechify voices in EAS Tools. The Native demos have been removed because they are no longer relevant, and the existing demos have been updated to reflect the new method of synthesis.
+
+---
+
+2026-07-18:
+
+- Add CMUDict fallback in phonemizer tool for words that are not found in the override list. This ensures that if a word is not found in the override list, the phonemizer will use the CMUDict to generate the phonetic representation of the word, which should improve accuracy and reduce errors when processing text. The order is now override list, then CMUDict, then g2p via phonemizer. This change should improve the overall accuracy and reliability of the phonemizer tool, especially for words that are not commonly used or have unusual pronunciations.
+
+- Add [VDSwiss](https://fontstruct.com/fontstructions/show/2914531/vdswiss-v1-1) font to Text Crawl Generator. This font was hand-made by Gigabyte97 and is a clean, sans-serif font that is well-suited for use in VDS crawls. Thank you to Gigabyte for creating and allowing me to use the font in EAS Tools!
+
+- Add SAGE 1822 "Buzzer" sound effect to Encoder. This is a variant of the Sage 1822 attention tone that sounds like a loud lawnmower/buzzer, and can be used in place of the standard attention tone. Why did I add this? Because sometimes, you gotta have fun.
+
+- Fix a bug where the Attention Tone mode would be overridden in the Encoder on reload.
+
+---
+
+2026-07-15:
+
+- Try to resolve a small audio ducking issue on native Android app when recording alerts via stream decoder.
+
+- Splicer bundle edits to ensure large files load properly instead of crashing the native iOS app.
+
+---
+
+2026-07-14:
+
+- Fix a couple bugs in the encoder that were causing REAL hardware to never decode or process alerts made by EAS Tools. This was a longstanding issue that was only recently reported to me by Dani (@_tru3) in the GWES Discord, and I was able to track down the cause of the issue and implement a fix. The issue was related to the way the encoder was generating the tone alert for SAME, which was causing some hardware decoders to fail to recognize the alert at all if they were strict about the data received. The fix involved adjusting the tone generation process to ensure that the alert is generated in a way that is compatible with all hardware decoders, no matter how old or new they are. If you are still experiencing issues with hardware decoders not recognizing alerts generated by EAS Tools, please let me know so I can investigate further and address any remaining issues. As well, an off-by-one date bug has been resolved.
+
+---
+
+2026-07-09:
+
+- Update tool loading to lazy-load when possible, and reduce the number of times the tools are loaded in the browser. This should improve performance and reduce memory usage, especially on lower-end devices or when using multiple tools at once. If you notice any issues with tool loading or performance after this change, please let me know so I can investigate and address them as soon as possible.
+
+- Add Text Crawl tool JSON export/import to presets. This allows users to save and load their Text Crawl tool settings as JSON files, making it easier to share and reuse configurations across different projects or devices. If you have any important presets in your Text Crawl tool, be sure to export them and save a copy elsewhere in case of any issues with the presets in the future. If you encounter any problems with the JSON export/import feature, please report them so they can be addressed in future updates.
+
+---
+
+2026-07-05:
+
+- Add links to Google Play and Apple App Store to the README.md file and web FAQ. This allows users to easily access the mobile app versions of EAS Tools directly from the README. Pretty simple change, but needed.
+
+- Some small cleanup of code and stray, useless comments across the codebase.
+
+---
+
+2026-07-04:
+
+- Firstly, 🇺🇸 Happy Independence Day! 🇺🇸 This is a **massive** change update for today, so buckle in. To start us off, I have added Speechify Tom AND AcuVoice Roger - WASM Editions - to the encoder and splicer. They should be bit-accurate to the web TTS voices, but if you notice any discrepancies between the WASM and web versions, please let me know! The WASM editions of these voices are designed to run in the browser without requiring any external web calls, making them perfect for local-only work or cloning the voices for use in other applications. You are free to use the code and voice banks (I certainly did.) for anything you wish.
+
+- Update Loquendo Dave demo file to a new version to reflect the backend changes made to the Loquendo Dave voice in the web TTS service. The new version of Loquendo Dave has been ripped DIRECTLY from a SAGE 3644 DIGITAL ENDEC, meaning it is now accurate to the original Loquendo Dave voice used on the SAGE 3644. The previous version of Loquendo Dave was borrowed from Internet Archive (also known as the "Oddcast/Version 7" version), which was a slightly different version of the voice that was nowhere close in terms of pronunciation and quality to the original SAGE 3644 version. The new version of Loquendo Dave is a significant improvement over the previous version, and should provide a much more authentic experience for users who are familiar with the real Loquendo Dave voice. A small fix has already been made to the web TTS service to ensure proper speed reduction during synthesis (the SAGE units slow the voice down by a staggering 40%, which changes Dave's prosody/how fast he speaks messages). If you notice any issues with the new version of Loquendo Dave (failed synthesis being chief among them), please let me know so I can investigate and address these issues as soon as possible. PRO TIP: Some state names are pronounced fully, even when using the abbreviation ("AL" is pronounced "Alabama", for example), so if you are using Loquendo Dave to synthesize a message that includes state abbreviations, be sure to test the output to ensure that it sounds correct. The ENDEC has some kind of processing on it that causes state names to be spaced out (so "AL" is pronounced "A L" instead of "Alabama"), but the web TTS service does not have this processing, so it will pronounce state abbreviations as their full names. This is a known issue with the Loquendo Dave voice, and I am working on a fix for it that will be included in a future web TTS backend update. Simplest solution for now is to just spell the state abbreviation out in the text **with a space between the letters** (for example, "A L" instead of "AL") to ensure that it is pronounced correctly.
+
+- Improve bundled application size significantly to prepare for a massive app size reduction to the native mobile apps (iOS and Android) in the immediate future. The mobile apps will be significantly smaller in size than the current versions, which should make them much easier to download and install on mobile devices. This is part of a larger effort to make the EAS Tools more accessible and usable on a wider range of devices, including those with limited storage space or slower internet connections. The changes should be completely invisible to most users of both the web and mobile apps, but if you notice any issues or bugs after this change, please let me know so I can address them as soon as possible.
+
+- Fix some bugs in the audio splicer tool that were causing issues with certain macros and effects. These bugs were related to the way the tool was handling certain processing steps, and have now been resolved. If you encounter any further issues with the audio splicer tool, please report them so they can be addressed in future updates. Currently, the macro progress bar AND proper application of macro effect bugs reported by TechnoFanaticWX and JP's EAS MocksX in the GWES Discord have **NOT** been fixed, but I am aware of them and am working on a fix that will be uploaded in the VERY near future. Maybe later tonight, or tomorrow if I get caught up in the mobile app optimization work.
+
+- We're now fully self-hosted, end to end! The EAS Tools website has been moved to a Hetzner VPS that I have managed for years now (and will continue to manage), and the entire website is now fully self-hosted on this VPS. This means that all of the code, assets, and data for the EAS Tools website are now hosted on a server that I control, rather than relying on GitHub Pages and their deployment stack. The main reason for this change is simple: storage limit size. GitHub Pages has a hard limit of 1 GB of data for Pages deployments; I expect to exceed this in the near future. This change also allows for greater control over the website's performance, security, and availability. Overall, this change should result in a more stable and reliable experience for users of the EAS Tools website and apps. NOTE: There may be a _small_ delay in changes appearing from GitHub to the live website due to the new deployment process, but this should be resolved in the near future as I continue to optimize the deployment process for this change. If you notice any new issues after this change, especially those concerning performance or availability, please let me know so I can address them as soon as possible.
+
+---
+
+2026-06-30:
+
+- Significantly improve macro rendering times and performance in-browser. If you are still having issues with render times being extremely slow, there is not much I can do about it at this point, everything has been optimized as much as possible. If you **are** still having issues, please let me know what browser, device, and macro you are using, so I can attempt to investigate further. Thanks!
+
+---
+
+2026-06-29:
+
+- MAJOR, MAJOR UPDATE: Audacity 2.4.2 macros and plugins (**pretty much** all plugins, macros) are now present and FULLY functional in the audio splicer tool! This means that you can now use regular Audacity macros and plugins to process audio in the splicer tool, just like you would in Audacity 2.4.2 on a Windows desktop, which opens up a whole new world of possibilities for audio editing and manipulation via EAS Tools. The macros and plugins have been THOROUGHLY tested and verified to work correctly in nearly every single test case, but if you encounter _any_ issues or bugs (things like silent audio output, weird macro behavior that is not normally encountered in Audacity itself), please report them, **_being sure to include the name of the macro you used!!!_**, so they can be addressed ASAP with the next EAS Tools update. This means no more Audacity 2.4.2 installation or portable version is needed to use the macros and plugins that are well known in the EAS community, as they are now _nearly fully_ integrated into the audio splicer tool. This is a huge step forward in terms of functionality and usability for the audio splicer tool, and it should make it much easier for users to process audio files without needing to rely on external software or having a computer. Enjoy!
+
+- Added more macros and valid effects. Updated macro list to try and web fetch the full list of macros when possible. This allows me to add macros without having to "bake them in" twice every single time, so to say.
+
+- Improve accessibility of audio splicer macros, as well as add some effects in that are used in macros but were previously not implemented in the code.
+
+---
+
+2026-06-07:
+
+- Update audio splicer tool in multiple ways, including adding a new, dedicated "60hz Hum" effect and bitcrush/alias effect, un-gate static noise so it's not only available when using a macro (meaning, it can now be used on its own without needing to be part of a macro; this also applies to the new effects), macro render results are now cached (so if you pause/play the audio with a macro active, it does not re-render the entire macro from scratch every time), and various other bug fixes and improvements to the code. Playback is also now seekable rather than only allowing pausing/playing from the beginning, which is a nice quality of life improvement for those that want to listen to certain parts of the audio rather than listening to the entire file.
+
+---
+
+2026-06-05:
+
+- Update WarnGen a bit to prepare for mobile app deployment. These changes should be invisible on web, but they are necessary to ensure that the mobile app can properly load and run WarnGen without any issues.
+
+- Update workflow to add Digital Asset Links file for mobile app deployment. This allows the mobile app to verify that it is associated with the correct website, which is necessary for certain features such as deep linking and app-to-web communication.
+
+---
+
+2026-06-01:
+
+- Update FAQ to add common resource links for users who want to learn more about the EAS, audio/video editing in general, TTS, that kind of thing. Update other page docs as necessary. Thanks to [JP's EAS Mocks](https://www.youtube.com/@jps-EAS-Mocks) for the inspiration for the resources section!
+
+---
+
+2026-05-29:
+
+- Fonix Roger has been superseded by [AcuVoice Roger](https://github.com/wagwan-piffting-blud/AcuVoice-Roger). Same voice as Fonix Roger, MUCH better quality. The web TTS voice list and demos have been updated to reflect this change. AcuVoice Roger is the Desktop version of Fonix Roger, and has a much higher quality than the original Fonix Roger voice. The original Fonix Roger had some weird pronunciation issues, but AcuVoice Roger has much better pronunciation and slightly clearer voice quality. **As a result, Fonix Roger is no longer available from the Web TTS service due to the superior quality of AcuVoice Roger.** Fonix Roger can still be installed locally, however, as a standalone SAPI voice from the link below. Enjoy AcuVoice Roger!
+
+---
+
+2026-05-24:
+
+- Update web TTS voice list and demos. Festvox Kal is now the same version used on the DASDEC, and Fonix Roger has been added. [Fonix Roger](https://github.com/wagwan-piffting-blud/Fonix-Roger) was one of the contenders for CRS-era NOAA Weather Radio voices (~2002), but ultimately lost out to the Speechify lineup. Fonix Roger comes from the same Fonix as the DECTalk lineup after the buyout of Digital Equipment Corporation, and has a similar, robotic voice quality to the DECTalk voices. Fonix Roger is a good addition to the web TTS voice lineup because it provides another option for users who prefer a more "classic" TTS voice, which can be useful for certain types of products or for users who want a "what if" experience with a voice that was considered for use in NOAA Weather Radio during the CRS era. Enjoy!
+
+---
+
+2026-05-23:
+
+- Update phonemizer tool to handle more edge cases (the word "Louisville", for example, no longer causes an error). Thank you to Jasmine in the GWES Discord for reporting this issue.
+
+---
+
+2026-05-21:
+
+- Improve accessibility of the website by adding ARIA labels to interactive elements and ensuring that all content is properly structured for screen readers. This includes adding appropriate roles and labels to buttons, links, and form elements, as well as ensuring that the overall structure of the page is logical and easy to navigate for users with assistive technologies. These improvements will help make the website more inclusive and usable for a wider range of users, including those with visual impairments or other disabilities. **NOTE: If you use a screen reader and notice any issues with the accessibility of the website after this change, please let me know so I can address them!**
+
+---
+
+2026-05-17:
+
+- Add extra 1 second of silence to the beginning and end of NWS_CRS mode. This is because CRS tones have this extra silence built in, so adding it to the generated tones makes them sound more natural and similar to actual CRS tones.
+
+- Update "National Emergency Action Notification" (EAN code) to "National Emergency Message". The FCC made this change in 2022, but the same_us.json file still had the old name. This update ensures that the phrasing of EAN products in the encoder is accurate and consistent with the current terminology used by the FCC.
+
+- Update FE_AREA data from c_16ap26.dbf (3352 rows) and run the partOfParentRegion repair on the geojson. The repair process updates the partOfParentRegion property for each feature in the geojson based on the FE_AREA code from the shapefile. Results can be found in warngen/tools/output/repair_report.md. TL;DR: More accurate "x County in FE_AREA State" phrasing for almost all counties in the continental US. For example, "Scott County in FE_AREA Tennessee". FE_AREA previously was "northeastern", but has since been updated to be "east" because the data was "empirically derived" before, it is now "single source of truth" based on c_16ap26.dbf. This should make the phrasing of affected areas in products more accurate and consistent with the actual FE_AREA codes used by the NWS. The repair process also identified some discrepancies between the original geojson and the shapefile data, which have been corrected in the updated geojson. Overall, this update should improve the accuracy and reliability of the geographic data used in WarnGen for determining affected areas and generating product text.
+
+---
+
+2026-05-07:
+
+- Update GitHub Pages deployment action to remove deprecation warning for Node.js 20.
+
+---
+
+2026-04-26:
+
+- Added WarnGen to tools. WarnGen is a web-based AWIPS CAVE WarnGen clone with a focus on ease of use and accessibility. It is designed to be a lightweight alternative to the original WarnGen, with a simplified interface and reduced feature set compared to AWIPS CAVE (which is a full, desktop-only Java application.) The goal of WarnGen is to provide a tool that can be used by anyone, regardless of their technical expertise, to create and edit AWIPS/VTEC products. WarnGen is built using JavaScript and runs in the browser, making it accessible on a wide range of devices without the need for installation. It includes features such as a map interface for selecting affected areas, a form-based interface for entering product details, and the ability to export products in the standard .kml/.txt format. WarnGen is intended to be a user-friendly tool that can be used by both experienced meteorologists and those new to AWIPS/VTEC product creation. It even uses the same template system as AWIPS CAVE, so users familiar with CAVE will find the interface and workflow familiar. WarnGen is a great option for those who need to create AWIPS/VTEC products but do not have access to the full AWIPS CAVE application or prefer a simpler, more streamlined tool for product creation. NOTE: "Long-fused" products (such as Blizzard Warnings, Severe Thunderstorm/Tornado Watches, etc.) are not currently supported in this version of WarnGen! For now, WarnGen is focused on "short-fused" products (such as Tornado Warnings, Flash Flood Warnings, etc.) that are typically issued with a shorter lead time and require more frequent updates. If demand is high enough, long-fused products may be added in a future update (or made into a separate tool due to the templates/workflow being completely different), but for now, WarnGen is able to provide both CRS and BMH-based products for short-fused events, which are the most commonly used product types in AWIPS/VTEC. If you notice any anachronisms in the product templates (such as outdated office names, etc.) please let me know so I can update them! The templates are based on the most recent versions available in AWIPS CAVE, but there may be some discrepancies due to changes in AWIPS CAVE over time or differences between the template versions used by different offices. If you have any suggestions for improvements or new features, please let me know!
+
+- Updated README to cover WarnGen and provide basic instructions for use.
+
+- Updated FAQ to cover WarnGen and provide answers to common questions about the tool.
+
+---
+
+2026-04-24:
+
+- Introduced CHANGES.md to track changes and updates to the project.
+
+- Updated same-us.json with City of St. Louis, MO (Reordered to make it easier to find the city in the list).
+
+- Updated demos/voice list to match current TTS system status (change 1/2). Change 2/2 will immediately follow this one.
+
+- The aforementioned change 2/2 (add back ScanSoft Tom).
