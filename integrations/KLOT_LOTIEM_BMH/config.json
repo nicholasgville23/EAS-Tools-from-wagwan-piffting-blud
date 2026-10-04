@@ -1,0 +1,11 @@
+{
+  "app": "KLOT | LOTIEM TEXT WORKSTATION",
+  "mode": "SIMULATION_ONLY",
+  "text_workstation": {"ip_address":"192.168.10.144","port":6000,"station_id":"WNG689","location":"Valparaiso, Indiana"},
+  "bmh_station": {"station_id":"WXK89","status":"ONLINE (1)","location":"Valparaiso, Indiana","frequency_mhz":"162.400"},
+  "awips_header": {"type":"TTAAii","cccc":"KLOT","bbb":"NOR","bbb_version":"A","wsfo_id":"CHI","product_category":"Weather/EAS","product_designator":"LOT","addressee":"ALL"},
+  "message_options": {"send_to_bmh":true,"send_to_email":false,"send_to_iembot":false,"send_to_websites_outlets":false,"wrap_chat_edits_character":true},
+  "hazards":["Severe Thunderstorm Warning","Tornado Warning","Flash Flood Warning","Special Weather Statement","Extreme Wind Warning"],
+  "eas_event_codes":{"Severe Thunderstorm Warning":"SVR","Tornado Warning":"TOR","Flash Flood Warning":"FFW","Special Weather Statement":"SPW","Extreme Wind Warning":"EWW"},
+  "same":{"ugc_ne_il":"ILC-","ugc_nw_in":"INC-","test_message":"This is a test."}
+}
